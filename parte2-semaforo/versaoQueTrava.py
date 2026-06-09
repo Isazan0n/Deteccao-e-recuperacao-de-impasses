@@ -7,8 +7,19 @@ M = 200000
 
 def tarefa():
     global count
+
     for i in range(M):
-        count = count + 1
+        valor = count
+
+        # força troca de thread
+        if i % 100 == 0:
+            time.sleep(0)
+
+        valor += 1
+        count = valor
+
+        valor += 1
+        count = valor
 
 threads = []
 inicio = time.time()
