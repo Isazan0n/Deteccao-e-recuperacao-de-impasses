@@ -1,34 +1,31 @@
 import threading
 import time
 
-count = 0
-# semaforo binario só 1 thread por vez
-sem = threading.Semaphore(1)  
-T = 8
-M = 200000
+LOCK_A = threading.Lock()
+LOCK_B = threading.Lock()
 
-def tarefa():
-    global count
-    for i in range(M):
-        sem.acquire()
-        try:
-            count = count + 1
-        finally:
-            # libera mesmo se der erro
-            sem.release()  
+# sempre adquirir LOCK_A antes de LOCK_B em todas as threads
+def thread1():
+    LOCK_A.acquire()
+    LOCK_B.acquire()
+    print("T1 concluiu")
+    LOCK_B.release()
+    LOCK_A.release()
 
-threads = []
-inicio = time.time()
+def thread2():
+    LOCK_A.acquire()  
+    LOCK_B.acquire()
+    print("T2 concluiu")
+    LOCK_B.release()
+    LOCK_A.release()
 
-for _ in range(T):
-    t = threading.Thread(target=tarefa)
-    threads.append(t)
-    t.start()
+t1 = threading.Thread(target=thread1)
+t2 = threading.Thread(target=thread2)
 
-for t in threads:
-    t.join()
+t1.start()
+t2.start()
 
-fim = time.time()
-print(f"Esperado : {T * M}")
-print(f"Obtido   : {count}")
-print(f"Tempo    : {fim - inicio:.4f} segundos")
+t1.join()
+t2.join()
+
+print("Programa concluiu")
